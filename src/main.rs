@@ -157,8 +157,22 @@ fn main() {
             let source_path = &args[2];
             let source = std::fs::read_to_string(source_path).unwrap();
             match ved_compiler::compile_source(&source) {
-                Ok(_program) => println!("Compilation successful."),
-                Err(e) => println!("Error during compilation:\n{}", e),
+                Ok(program) => {
+                    println!("[CLI] Compilation successful.");
+                    use ved_compiler::codegen::BinaryPacker;
+                    let bytes = BinaryPacker::serialize(&program);
+                    let out_path = if source_path.ends_with(".ved") {
+                        source_path.replace(".ved", ".vedc")
+                    } else {
+                        format!("{}.vedc", source_path)
+                    };
+                    
+                    match std::fs::write(&out_path, &bytes) {
+                        Ok(_) => println!("[CLI] Emitted raw bytecode binary to: {} ({} bytes)", out_path, bytes.len()),
+                        Err(e) => println!("[CLI] Critical Error: Failed to write {}: {}", out_path, e),
+                    }
+                },
+                Err(e) => println!("Error during compilation:\n{:?}", e),
             }
         }
         _ => println!("Unknown command: {}", args[1]),
