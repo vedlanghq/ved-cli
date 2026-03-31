@@ -128,10 +128,11 @@ fn main() {
                         }
                     }
 
-                    let trace = scheduler.execute_until_quiescent(max_cycles, 1000);
-                    for line in trace {
+                    let run_metrics = scheduler.execute_until_quiescent(max_cycles, 1000);
+                    for line in run_metrics.trace {
                         println!("{}", line);
                     }
+                    println!("\n[CLI] Execution Metrics: Converged: {}, Steps: {}, Lo-Pri Executed: {}, Warnings: {}", run_metrics.converged, run_metrics.steps, run_metrics.low_priority_executed, run_metrics.warning_detected);
                     
                     let trace_file = format!("{}.trace.json", source_path);
                     let json_trace = scheduler.tracer.dump_json();
